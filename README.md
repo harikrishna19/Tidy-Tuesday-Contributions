@@ -10,4 +10,4 @@
 
 ![](images/Screenshot%20(196).png)
 
-Plot displays the medals won by a particular country,sport and year. Medal count is counted for all sports(team sports included)
+Plot displays the medals won by a particular country,sport and year. Medal count is counted for all sports(team sports included).
