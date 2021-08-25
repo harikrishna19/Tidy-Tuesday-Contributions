@@ -1,1 +1,1 @@
-# Tidy-Tuesday-COntributions
+# Tidy-Tuesday-Contributions
