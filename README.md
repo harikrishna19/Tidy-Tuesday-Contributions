@@ -2,7 +2,7 @@
 
 1.  **Olympic Medals-Week-31(2021-7-27):** Link to the Shiny App-[Link](https://harikrishna19.shinyapps.io/Olympics-TidyTuesday/ "Olympics")
 
-    **App Screenshots-**
+    **App Screenshots:**
 
     Output table where athletes details are displayed based on Country,Sport & Year
 
