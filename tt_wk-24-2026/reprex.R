@@ -1124,116 +1124,63 @@ ruin_panel <-
 # 15. FINAL 2 × 2 LAYOUT
 # ============================================================
 
-final_plot <-
+# ============================================================
+# GLOBAL LEGEND — PAGEVIEWS vs SITELINKS
+# ============================================================
+
+legend_plot <- ggplot() +
   
-  (
-    castle_panel |
-      fortress_panel
-  ) /
-  
-  (
-    palace_panel |
-      ruin_panel
+  # Sitelinks
+  geom_point(
+    aes(x = 0, y = 0),
+    shape = 21,
+    size = 3.5,
+    fill = bg_colour,
+    colour = ink,
+    stroke = 1.3
   ) +
   
-  plot_annotation(
-    
-    # --------------------------------------------------------
-    # Main title
-    # --------------------------------------------------------
-    
-    title =
-      "CASTLEMAPS",
-    
-    # --------------------------------------------------------
-    # Subtitle
-    # --------------------------------------------------------
-    
-    subtitle =
-      paste0(
-        "The World's Most Famous Castles, Mapped by Fame · ",
-        big_story
-      ),
-    
-    # --------------------------------------------------------
-    # Single global explanation
-    # --------------------------------------------------------
-    
-    # caption =
-    #   # paste0(
-    #   #   "<b>PAGEVIEW SHARE</b>  ",
-    #   #   "Share of combined Wikipedia pageviews among each ",
-    #   #   "category's top five landmarks."
-    #   # ),
-    
-    # --------------------------------------------------------
-    # Global theme
-    # --------------------------------------------------------
-    
-    theme =
-      theme(
-        
-        # Main title
-        plot.title =
-          element_text(
-            family = font_title,
-            size = 42,
-            face = "bold",
-            colour = ink,
-            hjust = 0,
-            lineheight = 0.85,
-            margin =
-              margin(
-                b = 5
-              )
-          ),
-        
-        # Subtitle
-        plot.subtitle =
-          element_text(
-            family = font_body,
-            size = 12.5,
-            face = "bold",
-            colour = muted_ink,
-            hjust = 0,
-            lineheight = 1.15,
-            margin =
-              margin(
-                b = 12
-              )
-          ),
-        
-        # Single pageview-share explanation
-        plot.caption =
-          element_markdown(
-            family = font_body,
-            size = 8.5,
-            colour = muted_ink,
-            hjust = 0,
-            lineheight = 1.2,
-            margin =
-              margin(
-                t = 10
-              )
-          ),
-        
-        # Background
-        plot.background =
-          element_rect(
-            fill = bg_colour,
-            colour = NA
-          ),
-        
-        # Outer whitespace
-        plot.margin =
-          margin(
-            t = 18,
-            r = 22,
-            b = 14,
-            l = 22
-          )
-      )
+  geom_text(
+    aes(x = 1.2, y = 0),
+    label = "Sitelinks",
+    hjust = 0,
+    family = font_body,
+    fontface = "bold",
+    size = 3,
+    colour = ink
+  ) +
+  
+  # Pageviews — close to sitelinks
+  geom_point(
+    aes(x = 6, y = 0),
+    shape = 21,
+    size = 3.5,
+    fill = ink,
+    colour = ink
+  ) +
+  
+  geom_text(
+    aes(x = 7, y = 0),
+    label = "Pageviews",
+    hjust = 0,
+    family = font_body,
+    fontface = "bold",
+    size = 3,
+    colour = ink
+  ) +
+  
+  coord_cartesian(
+    xlim = c(-1, 22),
+    ylim = c(-0.7, 0.7)
+  ) +
+  
+  theme_void() +
+  theme(
+    plot.margin = margin(0, 0, 0, 0)
   )
+
+
+
 
 
 # ============================================================
@@ -1286,8 +1233,118 @@ final_plot <-
 # ------------------------------------------------------------
 # Display
 # ------------------------------------------------------------
+# ============================================================
+# GLOBAL LEGEND — PAGEVIEWS vs SITELINKS
+# ============================================================
+# ============================================================
+# 15. FINAL 2 × 2 LAYOUT WITH TOP-RIGHT LEGEND
+# ============================================================
+
+# ------------------------------------------------------------
+# Compact legend — two dots + labels, right-aligned content
+# so it reads naturally when placed in a corner
+# ------------------------------------------------------------
+
+legend_plot <- ggplot() +
+  
+  # Sitelinks — hollow dot
+  geom_point(
+    aes(x = 0, y = 0),
+    shape = 21, size = 3.6,
+    fill = bg_colour, colour = ink, stroke = 1.3
+  ) +
+  geom_text(
+    aes(x = 0.5, y = 0),
+    label = "Sitelinks %",
+    hjust = 0, vjust = 0.5,
+    family = font_body, fontface = "bold",
+    size = 2.9, colour = ink
+  ) +
+  
+  # Pageviews — solid dot
+  geom_point(
+    aes(x = 4.6, y = 0),
+    shape = 21, size = 3.6,
+    fill = ink, colour = ink
+  ) +
+  geom_text(
+    aes(x = 5.1, y = 0),
+    label = "Pageviews %",
+    hjust = 0, vjust = 0.5,
+    family = font_body, fontface = "bold",
+    size = 2.9, colour = ink
+  ) +
+  
+  coord_cartesian(
+    xlim = c(-0.3, 9),
+    ylim = c(-1, 1)
+  ) +
+  
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = bg_colour, colour = NA),
+    plot.margin = margin(2, 4, 2, 4)
+  )
+
+
+# ------------------------------------------------------------
+# Base 2x2 grid — legend is NOT part of this stack anymore
+# ------------------------------------------------------------
+
+grid_plot <-
+  (castle_panel | fortress_panel) /
+  (palace_panel | ruin_panel)
+
+
+# ------------------------------------------------------------
+# Float the legend into the top-right corner of the grid
+#
+# left/bottom/right/top are fractions (0-1) of the grid's
+# own plot area. Adjust `left`/`bottom` to nudge position.
+# ------------------------------------------------------------
+
+final_plot <-
+  grid_plot +
+  inset_element(
+    legend_plot,
+    left   = 0.80,
+    bottom = 0.93,
+    right  = 1.0,
+    top    = 1.0,
+    align_to = "full"
+  ) +
+  plot_annotation(
+    title = "Castles of the World: Visualizing Top 5 across 4 Categories",
+    subtitle = paste0(
+      "The World's Most Famous Castles, Mapped by Fame · ",
+      big_story
+    ),
+    caption = "Design: Hari Krishna.",
+    theme = theme(
+      plot.title = element_text(
+        family = font_title,
+        face = "bold",
+        size = 34,
+        colour = ink
+      ),
+      plot.subtitle = element_text(
+        family = font_body,
+        size = 11,
+        colour = muted_ink
+      ),
+      plot.caption = element_markdown(
+        family = font_body,
+        size = 12,
+        colour = "black",
+        hjust = 0
+      ),
+      plot.margin = margin(10, 15, 10, 15)
+    )
+  )
 
 final_plot
+
+
 
 
 # ============================================================
