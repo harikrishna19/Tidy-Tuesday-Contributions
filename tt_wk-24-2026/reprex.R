@@ -301,19 +301,19 @@ category_story <- function(category_name) {
       leader$country,
       " • ",
       leader$n,
-      "/5 of the top landmarks",
-      "   |   ",
-      comma(total_landmarks),
-      " mapped"
+      "/5 of the top landmarks"
+      # "   |   "
+      # comma(total_landmarks),
+      # " Mapped"
     )
     
   } else {
     
     paste0(
-      "Five countries share the top five",
-      "   |   ",
-      comma(total_landmarks),
-      " mapped"
+      "Five countries share the top 5"
+      # "   |   ",
+      # comma(total_landmarks),
+      # " mapped"
     )
   }
 }
@@ -663,9 +663,12 @@ make_category_map <- function(
     ) +
     
     coord_sf(
-      crs = "+proj=robin",
+      crs =  paste0(
+        "+proj=robin +lon_0=",
+        0
+      ),
       datum = NA,
-      expand = TRUE
+      expand = F,clip = "off"
     ) +
     
     theme_void() +
@@ -673,10 +676,10 @@ make_category_map <- function(
     theme(
       plot.margin =
         margin(
-          t = 2,
-          r = 4,
-          b = 2,
-          l = 4
+          t = 0,
+          r = 0,
+          b = 0,
+          l = 0
         )
     )
 }
@@ -1034,7 +1037,7 @@ make_category_panel <- function(
       label = story,
       hjust = 0,
       vjust = 1,
-      size = 3.15,
+      size = 5.15,
       colour = ink,
       fontface = "bold",
       family = font_body
@@ -1085,8 +1088,8 @@ make_category_panel <- function(
     
     heights = c(
       0.15,
-      0.39,
-      0.46
+      0.44,
+      0.41
     )
   )
 }
@@ -1255,10 +1258,10 @@ legend_plot <- ggplot() +
   ) +
   geom_text(
     aes(x = 0.5, y = 0),
-    label = "Sitelinks %",
+    label = "SiteLinks %",
     hjust = 0, vjust = 0.5,
     family = font_body, fontface = "bold",
-    size = 2.9, colour = ink
+    size = 3.9, colour = ink
   ) +
   
   # Pageviews — solid dot
@@ -1269,10 +1272,10 @@ legend_plot <- ggplot() +
   ) +
   geom_text(
     aes(x = 5.1, y = 0),
-    label = "Pageviews %",
+    label = "PageViews %",
     hjust = 0, vjust = 0.5,
     family = font_body, fontface = "bold",
-    size = 2.9, colour = ink
+    size = 3.9, colour = ink
   ) +
   
   coord_cartesian(
@@ -1314,12 +1317,9 @@ final_plot <-
     align_to = "full"
   ) +
   plot_annotation(
-    title = "Castles of the World: Visualizing Top 5 across 4 Categories",
-    subtitle = paste0(
-      "The World's Most Famous Castles, Mapped by Fame · ",
-      big_story
-    ),
-    caption = "Design: Hari Krishna.",
+    title = "Castles of the World:Top 5 across 4 Categories",
+    subtitle ="Site Links vs Page Views for Top 5 visualized",
+    caption = "Design:HariKrishna,Data:TidyTuesday",
     theme = theme(
       plot.title = element_text(
         family = font_title,
@@ -1329,11 +1329,11 @@ final_plot <-
       ),
       plot.subtitle = element_text(
         family = font_body,
-        size = 11,
-        colour = muted_ink
+        size = 16,
+        colour = "black"
       ),
       plot.caption = element_markdown(
-        family = font_body,
+        family = "mono",
         size = 12,
         colour = "black",
         hjust = 0
@@ -1347,26 +1347,3 @@ final_plot
 
 
 
-# ============================================================
-# 17. ALT TEXT
-# ============================================================
-
-alt_text <- paste(
-  
-  "Editorial data visualization titled CASTLEMAPS.",
-  
-  "Four panels compare castles, fortresses,",
-  "palaces and ruins.",
-  
-  "Each panel contains a world map highlighting",
-  "the countries represented among the category's",
-  "five most famous landmarks.",
-  
-  "A ranked leaderboard shows each landmark's",
-  "share of combined Wikipedia pageviews.",
-  
-  "Country flags appear beside each landmark name.",
-  
-  "The visualization explores where landmark fame",
-  "is concentrated across the world."
-)
