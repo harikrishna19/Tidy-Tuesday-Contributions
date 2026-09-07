@@ -11,3 +11,7 @@
 ![](images/Screenshot%20(196).png)
 
 Plot displays the medals won by a particular country,sport and year. Medal count is counted for all sports(team sports included as well).
+
+2.  World Castles Viz: TidyTuesday 2026:September
+
+![](images/final_tt.png)
