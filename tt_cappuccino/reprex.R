@@ -56,6 +56,10 @@ font_add_google(
 )
 
 font_add_google(
+  "Oswald",
+  "oswald"
+)
+font_add_google(
   "Inter",
   "inter"
 )
@@ -1208,19 +1212,19 @@ x_max <- 0.975
 
 gp_title <- gpar(
   fontsize = 32,
-  fontfamily = "bebas",
+  fontfamily = "oswald",
   col = title_color
 )
 
 gp_subtitle <- gpar(
   fontsize = 12.5,
-  fontfamily = "inter",
+  fontfamily = "oswald",
   col = subtitle_color
 )
 
 title_y <- 0.985
 
-title_text <- "How much work does a coffee cost across the globe?"
+title_text <- "Coffee Metrics Visualized"
 
 grid.text(
   title_text,
@@ -1239,7 +1243,7 @@ title_width <- text_w(
 )
 
 draw_bean(
-  cx =0.535,
+  cx =0.305,
   cy =
     title_y -
     0.023,
@@ -1543,7 +1547,7 @@ grid.text(
   x = header_x,
   y = header_y,
   gp = gpar(
-    fontfamily = "bebas",
+    fontfamily = "oswald",
     fontsize = 12,
     fontface = "bold",
     col = title_color
@@ -1608,7 +1612,7 @@ for (
     ),
     gp = gpar(
       fontsize = 14,
-      fontfamily = "bebas",
+      fontfamily = "oswald",
       col = coffee_dark
     )
   )
@@ -1765,7 +1769,7 @@ for (
       just = "centre",
       gp = gpar(
         fontfamily = "inter",
-        fontsize = 7,
+        fontsize = 9,
         fontface = "bold",
         col = coffee_dark
       )
@@ -1923,7 +1927,7 @@ grid.text(
   ),
   gp = gpar(
     fontsize = 17,
-    fontfamily = "bebas",
+    fontfamily = "oswald",
     fontface = "bold",
     col = coffee_dark
   )
@@ -2010,7 +2014,7 @@ draw_cafe_card <- function(
         )
       ),
     width = card_w,
-    height = card_h,
+    height = 0,
     r = unit(
       3,
       "mm"
@@ -2059,8 +2063,8 @@ draw_cafe_card <- function(
       "top"
     ),
     gp = gpar(
-      fontsize = 7.4,
-      fontfamily = "inter",
+      fontsize = 15.4,
+      fontfamily = "bebas",
       fontface = "bold",
       col = footer_color
     )
@@ -2075,16 +2079,16 @@ draw_cafe_card <- function(
     value,
     x =
       x +
-      0.017,
+      card_w / 2,
     y =
       card_top -
       0.050,
     just = c(
-      "left",
+      "centre",
       "top"
     ),
     gp = gpar(
-      fontsize = 20,
+      fontsize = 22,
       fontfamily = "bebas",
       fontface = "bold",
       col = title_color
@@ -2100,7 +2104,7 @@ draw_cafe_card <- function(
     detail,
     x =
       x +
-      0.017,
+      0.015,
     y =
       card_bottom +
       0.197,
@@ -2109,8 +2113,8 @@ draw_cafe_card <- function(
       "bottom"
     ),
     gp = gpar(
-      fontsize = 7.0,
-      fontfamily = "inter",
+      fontsize = 5.0,
+      fontfamily = "bebas",
       col = subtitle_color
     )
   )
@@ -2124,15 +2128,13 @@ draw_cafe_card <- function(
 draw_cafe_card(
   card_x[1],
   "CAFÉ SAMPLE",
-  format(
-    n_cafes,
-    big.mark = ","
-  ),
   sprintf(
-    "%d countries · %d cities",
+    "%s\n%d countries · %d cities",
+    format(n_cafes, big.mark = ","),
     n_countries,
     n_cities
   ),
+  "",
   accent = coffee_dark
 )
 
@@ -2140,18 +2142,18 @@ draw_cafe_card(
 # ===============================================================
 # CARD 2 — COUNTRIES
 # ===============================================================
+# CARD 2 — COUNTRIES
+# ===============================================================
 
 draw_cafe_card(
   card_x[2],
   "COUNTRIES",
-  format(
-    n_countries,
-    big.mark = ","
-  ),
   sprintf(
-    "%d cafés represented",
+    "%s\n%d cafés represented",
+    format(n_countries, big.mark = ","),
     n_cafes
   ),
+  "",
   accent = coffee_color
 )
 
@@ -2159,21 +2161,19 @@ draw_cafe_card(
 # ===============================================================
 # CARD 3 — CITIES
 # ===============================================================
-
 draw_cafe_card(
   card_x[3],
   "CITIES",
-  format(
-    n_cities,
-    big.mark = ","
-  ),
   sprintf(
-    "%d cafés across the sample",
-    n_cafes
+    "%s\n%d%% urban · %d%% suburban · %d%% rural",
+    format(n_cities, big.mark = ","),
+    urban_pct,
+    suburban_pct,
+    rural_pct
   ),
+  "",
   accent = tray_line
 )
-
 
 # ===============================================================
 # CARD 4 — CAFÉ PRICE
@@ -2189,23 +2189,14 @@ draw_cafe_card(
   card_x[4],
   "AVERAGE CAFÉ PRICE",
   sprintf(
-    "£%.2f",
-    mean_cafe_price
+    "£%.2f\n£%.2f → £%.2f",
+    mean_cafe_price,
+    min(cafe$price_gbp, na.rm = TRUE),
+    max(cafe$price_gbp, na.rm = TRUE)
   ),
-  sprintf(
-    "Observed range £%.2f → £%.2f",
-    min(
-      cafe$price_gbp,
-      na.rm = TRUE
-    ),
-    max(
-      cafe$price_gbp,
-      na.rm = TRUE
-    )
-  ),
+  "",
   accent = coffee_dark
 )
-
 
 # ===============================================================
 # 39. SECONDARY CAFÉ INSIGHT LINE
@@ -2215,66 +2206,66 @@ secondary_y <-
   cafe_bottom -
   0.005
 
-grid.text(
-  sprintf(
-    "WHERE THEY ARE  ·  %d%% urban  ·  %d%% suburban  ·  %d%% rural",
-    urban_pct,
-    suburban_pct,
-    rural_pct
-  ),
-  x = x0,
-  y = secondary_y,
-  just = c(
-    "left",
-    "top"
-  ),
-  gp = gpar(
-    fontsize = 7.7,
-    fontfamily = "inter",
-    fontface = "bold",
-    col = subtitle_color
-  )
-)
+# grid.text(
+#   sprintf(
+#     "WHERE THEY ARE  ·  %d%% urban  ·  %d%% suburban  ·  %d%% rural",
+#     urban_pct,
+#     suburban_pct,
+#     rural_pct
+#   ),
+#   x = x0,
+#   y = secondary_y,
+#   just = c(
+#     "left",
+#     "top"
+#   ),
+#   gp = gpar(
+#     fontsize = 7.7,
+#     fontfamily = "inter",
+#     fontface = "bold",
+#     col = subtitle_color
+#   )
+# )
 
 
 # ===============================================================
 # 40. EDITORIAL TAKEAWAY
 # ===============================================================
-
-takeaway_y <-
-  secondary_y -
-  0.025
-
-grid.text(
-  "WHY IT MATTERS",
-  x = x0,
-  y = takeaway_y,
-  just = c(
-    "left",
-    "top"
-  ),
-  gp = gpar(
-    fontsize = 7.8,
-    fontfamily = "inter",
-    fontface = "bold",
-    col = coffee_dark
-  )
-)
-
-grid.text(
-  "A cappuccino's price is only half the story. The same drink can demand very different amounts of work depending on local wages — and the café sample itself is uneven across countries.",
-  x = x0 + 0.095,
-  y = takeaway_y,
-  just = c(
-    "left",
-    "top"
-  ),
-  gp = gpar(
-    fontsize = 7.7,
-    fontfamily = "inter",
-    col = subtitle_color
-  )
-)
+# 
+# takeaway_y <-
+#   secondary_y -
+#   0.025
+# 
+# grid.text(
+#   "WHY IT MATTERS",
+#   x = x0,
+#   y = 0.255,
+#   just = c(
+#     "left",
+#     "top"
+#   ),
+#   gp = gpar(
+#     fontsize = 7.8,
+#     fontfamily = "inter",
+#     fontface = "bold",
+#     col = coffee_dark
+#   )
+# )
+# 
+# grid.text(
+#   "A cappuccino's price is only half the story. The same drink can demand very different amounts of work depending on local wages — and the café sample itself is uneven across countries.",
+#   x = x0 + 0.195,
+#   y = 0.255,
+#   just = c(
+#     "left",
+#     "top"
+#   ),
+#   gp = gpar(
+#     fontsize = 7.7,
+#     fontfamily = "inter",
+#     col = subtitle_color
+#   )
+# )
 
 
 # ===============================================================
@@ -2285,34 +2276,34 @@ footer_bottom <- 0.012
 
 footer_divider_y <-
   footer_bottom +
-  0.025
+  0.285
 
-grid.lines(
-  x = c(
-    x0,
-    x_max
-  ),
-  y = c(
-    footer_divider_y,
-    footer_divider_y
-  ),
-  gp = gpar(
-    col = line_color,
-    lwd = 0.8
-  )
-)
+# grid.lines(
+#   x = c(
+#     x0,
+#     x_max
+#   ),
+#   y = c(
+#     footer_divider_y,
+#     footer_divider_y
+#   ),
+#   gp = gpar(
+#     col = line_color,
+#     lwd = 0.8
+#   )
+# )
 
 grid.text(
-  "Source: TidyTuesday 2026-09-08 · Hari Krishna",
+  "Data: TidyTuesday · Design: Hari Krishna",
   x = x_max,
-  y = footer_bottom + 0.012,
+  y = footer_bottom + 0.315,
   just = c(
     "right",
     "center"
   ),
   gp = gpar(
-    fontsize = 7.5,
-    fontfamily = "inter",
-    col = footer_color
+    fontsize = 15.5,
+    fontfamily = "oswald",
+    col = "black"
   )
 )
