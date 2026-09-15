@@ -1220,7 +1220,7 @@ gp_subtitle <- gpar(
 
 title_y <- 0.985
 
-title_text <- "COFFEE-COUNTRIES"
+title_text <- "How much work does a coffee cost across the globe?"
 
 grid.text(
   title_text,
@@ -1239,10 +1239,7 @@ title_width <- text_w(
 )
 
 draw_bean(
-  cx =
-    x0 +
-    title_width +
-    0.027,
+  cx =0.535,
   cy =
     title_y -
     0.023,
@@ -1416,12 +1413,12 @@ axis_y <-
   divider_y -
   0.012
 
-draw_line(
-  "How much work does a coffee cost across the globe?",
-  x0,
-  axis_y,
-  gp_axis
-)
+# draw_line(
+#   "How much work does a coffee cost across the globe?",
+#   x0,
+#   axis_y,
+#   gp_axis
+# )
 
 # draw_line(
 #   "COFFEE LEVEL = MIN · MEAN · MEDIAN · MAX",
