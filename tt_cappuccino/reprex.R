@@ -1559,340 +1559,340 @@ grid.text(
 # 34. CONTINENT ROWS
 # ===============================================================
 
-for (
-  i in seq_along(continents)
-) {
-  
-  cont <-
-    continents[i]
-  print(cont)
-  
-  rows <- continent_summary %>%
-    filter(
-      continent == cont
-    ) %>%
-    arrange(
-      stat
-    )
-  
-  
-  # -------------------------------------------------------------
-  # ROW POSITION
-  #
-  # The gap is added between rows.
-  # -------------------------------------------------------------
-  
-  row_top <-
-    1 -
-    (i - 1) *
-    (
-      row_h +
-        continent_gap
-    )
-  
-  row_bot <-
-    row_top -
-    row_h
-  
-  cy <-
-    row_top -
-    row_h / 2
-  
-  
-  # =============================================================
-  # CONTINENT LABEL
-  # =============================================================
-  
-  grid.text(
-    cont,
-    x = 0,
-    y = cy,
-    just = c(
-      "left",
-      "center"
-    ),
-    gp = gpar(
-      fontsize = 14,
-      fontfamily = "oswald",
-      col = coffee_dark
-    )
-  )
-  
-  
-  # =============================================================
-  # MAP
-  # =============================================================
-  
-  map_center_x <-
-    label_w +
-    map_w / 3
-  
-  if (cont == "Oceania") {
-    map_x <- map_center_x - 0.13
-    map_width <- map_w * 0.90
-  }
-  else{
-    map_x<-map_center_x-0.07
-  }
-  pushViewport(
-    viewport(
-      x = map_x,
-      y = cy,
-      width = 2.37,
-      jus="center",
-      height =
-        row_h
-    )
-  )
-  
-  grid.draw(
-    ggplotGrob(
-      continent_maps[[cont]]
-    )
-  )
-  
-  upViewport()
-  
-  
-  # =============================================================
-  # COFFEE CARD AREA
-  #
-  # The card is deliberately smaller than row_h.
-  # This creates visible space between continent cards.
-  # =============================================================
-  
-  tray_x0 <-
-    cups_x0
-  
-  tray_x1 <-
-    cups_x1
-  
-  tray_h <-
-    row_h *
-    1.22
-  
-  
-  # -------------------------------------------------------------
-  # CARD
-  # -------------------------------------------------------------
-  
-  grid.roundrect(
-    x =
-      mean(
-        c(
-          tray_x0,
-          tray_x1
+    for (
+      i in seq_along(continents)
+    ) {
+      cont <-
+        continents[i]
+      
+      rows <- continent_summary %>%
+        filter(
+          continent == cont
+        ) %>%
+        arrange(
+          stat
         )
-      ),
-    y = cy,
-    width =
-      tray_x1 -
-      tray_x0,
-    height =
-      tray_h,
-    r = unit(
-      3,
-      "mm"
-    ),
-    gp = gpar(
-      fill = tray_color,
-      col = tray_line,
-      lwd = 0.9,
-      alpha = 0.52
-    )
-  )
-  
-  
-  # =============================================================
-  # FOUR CUP CELLS
-  # =============================================================
-  
-  n_cups <-
-    nrow(rows)
-  
-  cell_w <-
-    (
-      tray_x1 -
-        tray_x0
-    ) /
-    n_cups
-  
-  
-  # -------------------------------------------------------------
-  # CUP SIZE
-  #
-  # Same physical cup size for every statistic.
-  #
-  # The coffee level — not the cup size — carries the
-  # MIN / MEAN / MEDIAN / MAX meaning.
-  # -------------------------------------------------------------
-  
-  base_r <-
-    min(
-      0.030,
-      row_h * 0.27,
-      cell_w * 0.22
-    )
-  
-  
-  # Same cup size
-  size_mult <- c(
-    small  = 1,
-    medium = 1,
-    large  = 1
-  )
-  
-  
-  # =============================================================
-  # CUP LOOP
-  # =============================================================
-  
-  for (
-    j in seq_len(n_cups)
-  ) {
-    # -----------------------------------------------------------
-    # CENTER OF CARD CELL
-    # -----------------------------------------------------------
-    
-    cx <-
-      tray_x0 +
-      (
-        j - 0.5
-      ) *
-      cell_w
-    minutes_value <- rows$value[j]
-    grid.text(
-      paste0(round(minutes_value, 0), " min"),
-      x = cx,
-      y = cup_y + cup_r * 1.25,
-      just = "centre",
-      gp = gpar(
-        fontfamily = "inter",
-        fontsize = 9,
-        fontface = "bold",
-        col = coffee_dark
+      
+      
+      # -------------------------------------------------------------
+      # ROW POSITION
+      #
+      # The gap is added between rows.
+      # -------------------------------------------------------------
+      
+      row_top <-
+        1 -
+        (i - 1) *
+        (
+          row_h +
+            continent_gap
+        )
+      
+      row_bot <-
+        row_top -
+        row_h
+      
+      cy <-
+        row_top -
+        row_h / 2
+      
+      
+      # =============================================================
+      # CONTINENT LABEL
+      # =============================================================
+      
+      grid.text(
+        cont,
+        x = 0,
+        y = cy,
+        just = c(
+          "left",
+          "center"
+        ),
+        gp = gpar(
+          fontsize = 14,
+          fontfamily = "oswald",
+          col = coffee_dark
+        )
       )
-    )
-    
-    # -----------------------------------------------------------
-    # COFFEE LEVEL
-    #
-    # MIN    = low
-    # MEAN   = medium
-    # MEDIAN = medium
-    # MAX    = high
-    # -----------------------------------------------------------
-    
-    coffee_level <- dplyr::case_when(
       
-      rows$stat[j] == "min" ~
-        0.28,
       
-      rows$stat[j] == "mean" ~
-        0.52,
+      # =============================================================
+      # MAP
+      # =============================================================
       
-      rows$stat[j] == "median" ~
-        0.52,
+      map_center_x <-
+        label_w +
+        map_w / 3
       
-      rows$stat[j] == "max" ~
-        0.90,
-      
-      TRUE ~
-        0.50
-    )
-    
-    
-    # -----------------------------------------------------------
-    # CUP RADIUS
-    # -----------------------------------------------------------
-    
-    cup_r <- base_r 
-    
-    
-    # -----------------------------------------------------------
-    # CUP POSITION
-    #
-    # Slightly above card center.
-    #
-    # The cup is kept away from the top and bottom boundaries
-    # so steam and country labels remain inside the card.
-    # -----------------------------------------------------------
-    
-    cup_y <-
-      cy +
-      tray_h *
-      0.055
-    
-    
-    # ===========================================================
-    # CUP
-    # ===========================================================
-    
-    draw_cup(
-      cx = cx,
-      cy = cup_y,
-      r = cup_r,
-      coffee_level = coffee_level,
-      steam = TRUE
-    )
-    
-    
-    # ===========================================================
-    # COUNTRY
-    # ===========================================================
-    
-    grid.text(
-      abbrev_country(
-        rows$country[j],
-        13
-      ),
-      x = cx,
-      y =
-        cy -
-        tray_h *
-        0.34,
-      just = "center",
-      gp = gpar(
-        fontsize = 7.4,
-        fontfamily = "inter",
-        fontface = "bold",
-        col = title_color
+      if (cont == "Oceania") {
+        map_x <- map_center_x - 0.13
+        map_width <- map_w * 0.90
+      }
+      else{
+        map_x<-map_center_x-0.07
+      }
+      pushViewport(
+        viewport(
+          x = map_x,
+          y = cy,
+          width = 2.37,
+          jus="center",
+          height =
+            row_h
+        )
       )
-    )
-  }
-  
-  
-  # =============================================================
-  # ROW DIVIDER
-  #
-  # This is intentionally very subtle.
-  # The actual separation is created by the card gap.
-  # =============================================================
-  
-  if (
-    i < n_continents
-  ) {
-    
-    grid.lines(
-      x = c(
-        0,
-        1
-      ),
-      y = c(
-        row_bot -
-          continent_gap / 2,
-        row_bot -
-          continent_gap / 2
-      ),
-      gp = gpar(
-        col = line_color,
-        lwd = 0.35,
-        lty = "dotted",
-        alpha = 0.65
+      
+      grid.draw(
+        ggplotGrob(
+          continent_maps[[cont]]
+        )
       )
-    )
-  }
-}
+      
+      upViewport()
+      
+      
+      # =============================================================
+      # COFFEE CARD AREA
+      #
+      # The card is deliberately smaller than row_h.
+      # This creates visible space between continent cards.
+      # =============================================================
+      
+      tray_x0 <-
+        cups_x0
+      
+      tray_x1 <-
+        cups_x1
+      
+      tray_h <-
+        row_h *
+        1.22
+      
+      
+      # -------------------------------------------------------------
+      # CARD
+      # -------------------------------------------------------------
+      
+      grid.roundrect(
+        x =
+          mean(
+            c(
+              tray_x0,
+              tray_x1
+            )
+          ),
+        y = cy,
+        width =
+          tray_x1 -
+          tray_x0,
+        height =
+          tray_h,
+        r = unit(
+          3,
+          "mm"
+        ),
+        gp = gpar(
+          fill = tray_color,
+          col = tray_line,
+          lwd = 0.9,
+          alpha = 0.52
+        )
+      )
+      
+      
+      # =============================================================
+      # FOUR CUP CELLS
+      # =============================================================
+      
+      n_cups <-
+        nrow(rows)
+      
+      cell_w <-
+        (
+          tray_x1 -
+            tray_x0
+        ) /
+        n_cups
+      
+      
+      # -------------------------------------------------------------
+      # CUP SIZE
+      #
+      # Same physical cup size for every statistic.
+      #
+      # The coffee level — not the cup size — carries the
+      # MIN / MEAN / MEDIAN / MAX meaning.
+      # -------------------------------------------------------------
+      
+      base_r <-
+        min(
+          0.030,
+          row_h * 0.27,
+          cell_w * 0.22
+        )
+      
+      
+      # Same cup size
+      size_mult <- c(
+        small  = 1,
+        medium = 1,
+        large  = 1
+      )
+      
+      
+      # =============================================================
+      # CUP LOOP
+      # =============================================================
+      
+      for (
+        j in seq_len(n_cups)
+      ) {
+        # -----------------------------------------------------------
+        # CENTER OF CARD CELL
+        # -----------------------------------------------------------
+      
+        cx <-
+          tray_x0 +
+          (
+            j - 0.5
+          ) *
+          cell_w
+        minutes_value <- rows$value[j]
+  
+        
+        # -----------------------------------------------------------
+        # COFFEE LEVEL
+        #
+        # MIN    = low
+        # MEAN   = medium
+        # MEDIAN = medium
+        # MAX    = high
+        # -----------------------------------------------------------
+        
+        coffee_level <- dplyr::case_when(
+          
+          rows$stat[j] == "min" ~
+            0.28,
+          
+          rows$stat[j] == "mean" ~
+            0.52,
+          
+          rows$stat[j] == "median" ~
+            0.52,
+          
+          rows$stat[j] == "max" ~
+            0.90,
+          
+          TRUE ~
+            0.50
+        )
+        
+        
+        # -----------------------------------------------------------
+        # CUP RADIUS
+        # -----------------------------------------------------------
+        
+        cup_r <- base_r 
+        
+        
+        # -----------------------------------------------------------
+        # CUP POSITION
+        #
+        # Slightly above card center.
+        #
+        # The cup is kept away from the top and bottom boundaries
+        # so steam and country labels remain inside the card.
+        # -----------------------------------------------------------
+        
+        cup_y <-
+          cy +
+          tray_h *
+          0.055
+        
+        
+        grid.text(
+          paste0(round(minutes_value, 0), " min"),
+          x = cx,
+          y = cup_y + cup_r * 1.25,
+          just = "centre",
+          gp = gpar(
+            fontfamily = "inter",
+            fontsize = 9,
+            fontface = "bold",
+            col = coffee_dark
+          )
+        )
+        
+        # ===========================================================
+        # CUP
+        # ===========================================================
+        
+        draw_cup(
+          cx = cx,
+          cy = cup_y,
+          r = cup_r,
+          coffee_level = coffee_level,
+          steam = TRUE
+        )
+        
+        
+        # ===========================================================
+        # COUNTRY
+        # ===========================================================
+        
+        grid.text(
+          abbrev_country(
+            rows$country[j],
+            13
+          ),
+          x = cx,
+          y =
+            cy -
+            tray_h *
+            0.34,
+          just = "center",
+          gp = gpar(
+            fontsize = 7.4,
+            fontfamily = "inter",
+            fontface = "bold",
+            col = title_color
+          )
+        )
+      }
+      
+      
+      # =============================================================
+      # ROW DIVIDER
+      #
+      # This is intentionally very subtle.
+      # The actual separation is created by the card gap.
+      # =============================================================
+      
+      if (
+        i < n_continents
+      ) {
+        
+        grid.lines(
+          x = c(
+            0,
+            1
+          ),
+          y = c(
+            row_bot -
+              continent_gap / 2,
+            row_bot -
+              continent_gap / 2
+          ),
+          gp = gpar(
+            col = line_color,
+            lwd = 0.35,
+            lty = "dotted",
+            alpha = 0.65
+          )
+        )
+      }
+    }
 
 
 # ===============================================================
