@@ -1491,10 +1491,7 @@ cups_x1 <- 0.985
 
 continent_gap <- 0.018
 
-rows_height <-
-  plot_h -
-  continent_gap *
-  (n_continents - 1)
+rows_height <-0.8
 
 row_h <-
   rows_height /
@@ -1906,10 +1903,13 @@ upViewport()
 # 37. CAFÉS IN NUMBERS
 # ===============================================================
 
-cafe_top <- plot_ymin + 0.215
+cafe_top <-
+  plot_ymin -
+  0.012
+
 
 cafe_bottom <-
-  0.085
+  0.075
 
 
 # ===============================================================
@@ -1957,33 +1957,38 @@ grid.text(
 # 38. CAFÉ METRIC CARDS
 # ===============================================================
 
-cafe_top <- plot_ymin + 0.215
+card_top <-
+  cafe_top -
+  0.048
 
-card_top <- cafe_top - 0.052
-card_bottom <- cafe_bottom + 0.030
 
-card_gap <- 0.010
-card_w <- (x_max - x0 - card_gap * 3) / 4
-card_h <- card_top - card_bottom
+card_bottom <-
+  cafe_bottom
+
+
+card_gap <- 0.009
+
+
+card_w <-
+  (
+    x_max -
+      x0 -
+      card_gap * 3
+  ) /
+  4
+
+
 card_x <- c(
   x0,
-  x0 +
-    card_w +
-    card_gap,
-  x0 +
-    2 *
-    (
-      card_w +
-        card_gap
-    ),
-  x0 +
-    3 *
-    (
-      card_w +
-        card_gap
-    )
+  x0 + card_w + card_gap,
+  x0 + 2 * (card_w + card_gap),
+  x0 + 3 * (card_w + card_gap)
 )
 
+
+card_h <-
+  card_top -
+  card_bottom
 
 # ===============================================================
 # CARD FUNCTION
