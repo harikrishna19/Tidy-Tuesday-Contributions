@@ -1900,75 +1900,68 @@ upViewport()
 
 
 # ===============================================================
-# 36. CAFÉS IN NUMBERS
+# 37. CAFÉS IN NUMBERS
 # ===============================================================
 
-cafe_top <-
-  plot_ymin -
-  0.012
+cafe_top <- plot_ymin + 0.215
 
 cafe_bottom <-
-  0.075
+  0.085
 
 
-# ---------------------------------------------------------------
-# SECTION TITLE
-# ---------------------------------------------------------------
+# ===============================================================
+# SECTION HEADER
+# ===============================================================
 
-gp_cafe_title <- gpar(
-  fontsize = 15,
-  fontfamily = "bebas",
-  col = coffee_dark
-)
-
-draw_line(
+grid.text(
   "CAFÉS IN NUMBERS",
-  x0,
-  cafe_top,
-  gp_cafe_title
+  x = x0,
+  y = cafe_top,
+  just = c(
+    "left",
+    "top"
+  ),
+  gp = gpar(
+    fontsize = 17,
+    fontfamily = "bebas",
+    fontface = "bold",
+    col = coffee_dark
+  )
 )
 
 
-# ---------------------------------------------------------------
+# ===============================================================
 # SECTION DESCRIPTION
-# ---------------------------------------------------------------
+# ===============================================================
 
-gp_cafe_sub <- gpar(
-  fontsize = 9.0,
-  fontfamily = "inter",
-  col = subtitle_color
-)
-
-draw_line(
-  "The country index is only part of the story. Café-level observations reveal how much prices can vary.",
-  x0,
-  cafe_top -
-    0.028,
-  gp_cafe_sub
+grid.text(
+  "The index starts with a country-level measure. The café sample shows what sits underneath it.",
+  x = x0,
+  y = cafe_top - 0.029,
+  just = c(
+    "left",
+    "top"
+  ),
+  gp = gpar(
+    fontsize = 8.8,
+    fontfamily = "inter",
+    col = subtitle_color
+  )
 )
 
 
 # ===============================================================
-# 37. INSIGHT CARDS
+# 38. CAFÉ METRIC CARDS
 # ===============================================================
 
-card_top <-
-  cafe_top -
-  0.048
+cafe_top <- plot_ymin + 0.215
 
-card_bottom <-
-  cafe_bottom
+card_top <- cafe_top - 0.052
+card_bottom <- cafe_bottom + 0.030
 
-card_gap <- 0.009
-
-card_w <-
-  (
-    x_max -
-      x0 -
-      card_gap * 3
-  ) /
-  4
-
+card_gap <- 0.010
+card_w <- (x_max - x0 - card_gap * 3) / 4
+card_h <- card_top - card_bottom
 card_x <- c(
   x0,
   x0 +
@@ -1988,22 +1981,22 @@ card_x <- c(
     )
 )
 
-card_h <-
-  card_top -
-  card_bottom
-
 
 # ===============================================================
-# 38. CARD FUNCTION
+# CARD FUNCTION
 # ===============================================================
 
-draw_card <- function(
+draw_cafe_card <- function(
     x,
-    title,
+    label,
     value,
     detail,
     accent = coffee_color
 ) {
+  
+  # -------------------------------------------------------------
+  # BACKGROUND
+  # -------------------------------------------------------------
   
   grid.roundrect(
     x =
@@ -2023,28 +2016,25 @@ draw_card <- function(
       "mm"
     ),
     gp = gpar(
-      fill = "#F4E4D5",
+      fill = cafe_card,
       col = NA
     )
   )
   
   
   # -------------------------------------------------------------
-  # ACCENT STRIP
+  # TOP ACCENT
   # -------------------------------------------------------------
   
   grid.rect(
     x =
       x +
-      0.003,
+      card_w / 2,
     y =
       card_top -
-      0.006,
-    width =
-      0.006,
-    height =
-      card_h -
-      0.012,
+      0.004,
+    width = card_w,
+    height = 0.008,
     gp = gpar(
       fill = accent,
       col = NA
@@ -2053,23 +2043,23 @@ draw_card <- function(
   
   
   # -------------------------------------------------------------
-  # TITLE
+  # LABEL
   # -------------------------------------------------------------
   
   grid.text(
-    title,
+    label,
     x =
       x +
-      0.018,
+      0.017,
     y =
       card_top -
-      0.015,
+      0.018,
     just = c(
       "left",
       "top"
     ),
     gp = gpar(
-      fontsize = 7.8,
+      fontsize = 7.4,
       fontfamily = "inter",
       fontface = "bold",
       col = footer_color
@@ -2078,24 +2068,24 @@ draw_card <- function(
   
   
   # -------------------------------------------------------------
-  # VALUE
+  # BIG NUMBER
   # -------------------------------------------------------------
   
   grid.text(
     value,
     x =
       x +
-      0.018,
+      0.017,
     y =
       card_top -
-      0.047,
+      0.050,
     just = c(
       "left",
       "top"
     ),
     gp = gpar(
-      fontsize = 15.5,
-      fontfamily = "inter",
+      fontsize = 20,
+      fontfamily = "bebas",
       fontface = "bold",
       col = title_color
     )
@@ -2110,16 +2100,16 @@ draw_card <- function(
     detail,
     x =
       x +
-      0.018,
+      0.017,
     y =
       card_bottom +
-      0.018,
+      0.197,
     just = c(
       "left",
       "bottom"
     ),
     gp = gpar(
-      fontsize = 7.6,
+      fontsize = 7.0,
       fontfamily = "inter",
       col = subtitle_color
     )
@@ -2128,10 +2118,10 @@ draw_card <- function(
 
 
 # ===============================================================
-# 39. CARD 1 — SAMPLE
+# CARD 1 — CAFÉS
 # ===============================================================
 
-draw_card(
+draw_cafe_card(
   card_x[1],
   "CAFÉ SAMPLE",
   format(
@@ -2142,120 +2132,160 @@ draw_card(
     "%d countries · %d cities",
     n_countries,
     n_cities
-  )
-)
-
-
-# ===============================================================
-# 40. CARD 2 — URBANITY
-# ===============================================================
-
-draw_card(
-  card_x[2],
-  "WHERE ARE THE CAFÉS?",
-  paste0(
-    urban_pct,
-    "% urban"
-  ),
-  sprintf(
-    "%d%% suburban · %d%% rural",
-    suburban_pct,
-    rural_pct
-  )
-)
-
-
-# ===============================================================
-# 41. CARD 3 — PRICE VARIATION
-# ===============================================================
-
-draw_card(
-  card_x[3],
-  "WIDEST PRICE SPREAD",
-  variation_country,
-  sprintf(
-    "£%.2f → £%.2f · £%.2f range",
-    variation_min,
-    variation_max,
-    variation_range
-  )
-)
-
-
-# ===============================================================
-# 42. CARD 4 — AFFORDABILITY OUTLIER
-# ===============================================================
-
-draw_card(
-  card_x[4],
-  "MOST WORK-INTENSIVE CAFÉ",
-  paste0(
-    round(
-      outlier_minutes
-    ),
-    " min"
-  ),
-  sprintf(
-    "%s · £%.2f cappuccino",
-    outlier_country,
-    outlier_price
   ),
   accent = coffee_dark
 )
 
 
 # ===============================================================
-# 43. EDITORIAL TAKEAWAY
+# CARD 2 — COUNTRIES
+# ===============================================================
+
+draw_cafe_card(
+  card_x[2],
+  "COUNTRIES",
+  format(
+    n_countries,
+    big.mark = ","
+  ),
+  sprintf(
+    "%d cafés represented",
+    n_cafes
+  ),
+  accent = coffee_color
+)
+
+
+# ===============================================================
+# CARD 3 — CITIES
+# ===============================================================
+
+draw_cafe_card(
+  card_x[3],
+  "CITIES",
+  format(
+    n_cities,
+    big.mark = ","
+  ),
+  sprintf(
+    "%d cafés across the sample",
+    n_cafes
+  ),
+  accent = tray_line
+)
+
+
+# ===============================================================
+# CARD 4 — CAFÉ PRICE
+# ===============================================================
+
+mean_cafe_price <-
+  mean(
+    cafe$price_gbp,
+    na.rm = TRUE
+  )
+
+draw_cafe_card(
+  card_x[4],
+  "AVERAGE CAFÉ PRICE",
+  sprintf(
+    "£%.2f",
+    mean_cafe_price
+  ),
+  sprintf(
+    "Observed range £%.2f → £%.2f",
+    min(
+      cafe$price_gbp,
+      na.rm = TRUE
+    ),
+    max(
+      cafe$price_gbp,
+      na.rm = TRUE
+    )
+  ),
+  accent = coffee_dark
+)
+
+
+# ===============================================================
+# 39. SECONDARY CAFÉ INSIGHT LINE
+# ===============================================================
+
+secondary_y <-
+  cafe_bottom -
+  0.005
+
+grid.text(
+  sprintf(
+    "WHERE THEY ARE  ·  %d%% urban  ·  %d%% suburban  ·  %d%% rural",
+    urban_pct,
+    suburban_pct,
+    rural_pct
+  ),
+  x = x0,
+  y = secondary_y,
+  just = c(
+    "left",
+    "top"
+  ),
+  gp = gpar(
+    fontsize = 7.7,
+    fontfamily = "inter",
+    fontface = "bold",
+    col = subtitle_color
+  )
+)
+
+
+# ===============================================================
+# 40. EDITORIAL TAKEAWAY
 # ===============================================================
 
 takeaway_y <-
-  cafe_bottom -
-  0.018
-
-gp_takeaway <- gpar(
-  fontsize = 8.8,
-  fontfamily = "inter",
-  col = subtitle_color
-)
-
-takeaway_text <- paste0(
-  "WHY IT MATTERS  ·  ",
-  "A cappuccino's price is only half the story. ",
-  "The same drink can demand very different amounts of work depending on local wages — ",
-  "and the café sample itself is uneven across countries."
-)
+  secondary_y -
+  0.025
 
 grid.text(
-  takeaway_text,
+  "WHY IT MATTERS",
   x = x0,
   y = takeaway_y,
   just = c(
     "left",
     "top"
   ),
-  gp = gp_takeaway
+  gp = gpar(
+    fontsize = 7.8,
+    fontfamily = "inter",
+    fontface = "bold",
+    col = coffee_dark
+  )
+)
+
+grid.text(
+  "A cappuccino's price is only half the story. The same drink can demand very different amounts of work depending on local wages — and the café sample itself is uneven across countries.",
+  x = x0 + 0.095,
+  y = takeaway_y,
+  just = c(
+    "left",
+    "top"
+  ),
+  gp = gpar(
+    fontsize = 7.7,
+    fontfamily = "inter",
+    col = subtitle_color
+  )
 )
 
 
 # ===============================================================
-# 44. FOOTER
+# 41. FOOTER
 # ===============================================================
-
-gp_footer <- gpar(
-  fontsize = 7.8,
-  fontfamily = "inter",
-  col = footer_color
-)
 
 footer_bottom <- 0.012
 
-footer_text_y <-
-  footer_bottom +
-  0.004
-
 footer_divider_y <-
-  footer_text_y +
-  0.020
+  footer_bottom +
+  0.025
 
 grid.lines(
   x = c(
@@ -2272,11 +2302,17 @@ grid.lines(
   )
 )
 
-draw_line(
+grid.text(
   "Source: TidyTuesday 2026-09-08 · Hari Krishna",
-  x_max,
-  footer_text_y +
-    0.012,
-  gp_footer,
-  hjust = "right"
+  x = x_max,
+  y = footer_bottom + 0.012,
+  just = c(
+    "right",
+    "center"
+  ),
+  gp = gpar(
+    fontsize = 7.5,
+    fontfamily = "inter",
+    col = footer_color
+  )
 )
