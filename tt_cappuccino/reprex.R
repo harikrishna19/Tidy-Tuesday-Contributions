@@ -9,21 +9,22 @@
 # DESIGN
 #
 #   COFFEE-COUNTRIES ☕
-#   subtitle
 #
-#   -------------------------------------------------------------
+#   MIN → MEAN → MEDIAN → MAX, PER REGION
 #
-#   LIGHTER = CHEAPER
+#   AFRICA       MAP       [ MIN ][ MEAN ][ MEDIAN ][ MAX ]
 #
-#   EUROPE       MAP       [ CUP ][ CUP ][ CUP ][ CUP ][ CUP ]
-#   ASIA         MAP       [ CUP ][ CUP ][ CUP ][ CUP ][ CUP ]
-#   AFRICA       MAP       [ CUP ][ CUP ][ CUP ][ CUP ][ CUP ]
+#                 ↓ SPACE
+#
+#   ASIA         MAP       [ MIN ][ MEAN ][ MEDIAN ][ MAX ]
+#
+#                 ↓ SPACE
+#
+#   EUROPE       MAP       [ MIN ][ MEAN ][ MEDIAN ][ MAX ]
+#
 #   ...
 #
-#   -------------------------------------------------------------
-#
 #   CAFÉS IN NUMBERS
-#   sample · urbanicity · price variation · affordability
 #
 # ===============================================================
 
@@ -35,6 +36,7 @@
 library(grid)
 library(dplyr)
 library(tidyr)
+library(tibble)
 library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -47,14 +49,6 @@ library(showtext)
 # ===============================================================
 # 1. FONTS
 # ===============================================================
-
-# Editorial headline + clean modern body font
-#
-# Bebas Neue:
-#   Strong condensed display font for titles.
-#
-# Inter:
-#   Clean, highly readable font for data labels and supporting text.
 
 font_add_google(
   "Bebas Neue",
@@ -182,7 +176,6 @@ rural_n <- sum(
   na.rm = TRUE
 )
 
-
 urban_pct <- round(
   urban_n / n_cafes * 100
 )
@@ -210,14 +203,12 @@ country_sample <- cafe %>%
     name = "n_cafes"
   )
 
-
 largest_sample <- country_sample %>%
   slice_max(
     n_cafes,
     n = 1,
     with_ties = FALSE
   )
-
 
 largest_sample_country <-
   largest_sample$country[1]
@@ -240,35 +231,29 @@ country_price_variability <- cafe %>%
   ) %>%
   summarise(
     n = n(),
-    
     median_price =
       median(
         price_gbp,
         na.rm = TRUE
       ),
-    
     min_price =
       min(
         price_gbp,
         na.rm = TRUE
       ),
-    
     max_price =
       max(
         price_gbp,
         na.rm = TRUE
       ),
-    
     price_range =
       max_price -
       min_price,
-    
     .groups = "drop"
   ) %>%
   filter(
     n >= 3
   )
-
 
 widest_variation <- country_price_variability %>%
   slice_max(
@@ -276,7 +261,6 @@ widest_variation <- country_price_variability %>%
     n = 1,
     with_ties = FALSE
   )
-
 
 variation_country <-
   widest_variation$country[1]
@@ -305,7 +289,6 @@ cheapest_cafe <- cafe %>%
     with_ties = FALSE
   )
 
-
 cheapest_cafe_country <-
   cheapest_cafe$country[1]
 
@@ -329,7 +312,6 @@ priciest_cafe <- cafe %>%
     n = 1,
     with_ties = FALSE
   )
-
 
 priciest_cafe_country <-
   priciest_cafe$country[1]
@@ -357,7 +339,6 @@ affordability_outlier <- cafe %>%
     with_ties = FALSE
   )
 
-
 outlier_country <-
   affordability_outlier$country[1]
 
@@ -383,7 +364,6 @@ d <- cappuccino_index %>%
     index
   )
 
-
 cheapest_country <-
   d$country[1]
 
@@ -391,7 +371,6 @@ cheapest_minutes <-
   round(
     d$index[1]
   )
-
 
 priciest_country <-
   d$country[nrow(d)]
@@ -401,16 +380,98 @@ priciest_minutes <-
     d$index[nrow(d)]
   )
 
-
 n_index_countries <-
   nrow(d)
 
 
 # ===============================================================
-# 14. TOP 5 CHEAPEST BY CONTINENT
+# 14. MIN / MEAN / MEDIAN / MAX BY CONTINENT
 # ===============================================================
 
-top5_by_continent <- cappuccino_index %>%
+get_continent_stats <- function(df) {
+  
+  min_val <-
+    min(
+      df$index,
+      na.rm = TRUE
+    )
+  
+  max_val <-
+    max(
+      df$index,
+      na.rm = TRUE
+    )
+  
+  mean_val <-
+    mean(
+      df$index,
+      na.rm = TRUE
+    )
+  
+  median_val <-
+    median(
+      df$index,
+      na.rm = TRUE
+    )
+  
+  min_row <- df %>%
+    slice_min(
+      index,
+      n = 1,
+      with_ties = FALSE
+    )
+  
+  max_row <- df %>%
+    slice_max(
+      index,
+      n = 1,
+      with_ties = FALSE
+    )
+  
+  mean_row <- df %>%
+    slice_min(
+      abs(index - mean_val),
+      n = 1,
+      with_ties = FALSE
+    )
+  
+  median_row <- df %>%
+    slice_min(
+      abs(index - median_val),
+      n = 1,
+      with_ties = FALSE
+    )
+  
+  tibble(
+    stat = c(
+      "min",
+      "mean",
+      "median",
+      "max"
+    ),
+    value = c(
+      min_val,
+      mean_val,
+      median_val,
+      max_val
+    ),
+    country = c(
+      min_row$country[1],
+      mean_row$country[1],
+      median_row$country[1],
+      max_row$country[1]
+    ),
+    iso3 = c(
+      min_row$iso3[1],
+      mean_row$iso3[1],
+      median_row$iso3[1],
+      max_row$iso3[1]
+    )
+  )
+}
+
+
+continent_summary <- cappuccino_index %>%
   filter(
     !is.na(continent),
     !is.na(index)
@@ -418,25 +479,32 @@ top5_by_continent <- cappuccino_index %>%
   group_by(
     continent
   ) %>%
-  arrange(
-    index,
-    .by_group = TRUE
+  group_modify(
+    ~ get_continent_stats(.x)
   ) %>%
-  slice_head(
-    n = 5
-  ) %>%
+  ungroup() %>%
   mutate(
-    rank = row_number()
+    stat = factor(
+      stat,
+      levels = c(
+        "min",
+        "mean",
+        "median",
+        "max"
+      )
+    )
   ) %>%
-  ungroup()
+  arrange(
+    continent,
+    stat
+  )
 
 
 continents <- sort(
   unique(
-    top5_by_continent$continent
+    continent_summary$continent
   )
 )
-
 
 n_continents <- length(
   continents
@@ -477,7 +545,14 @@ cup_ramp <- colorRampPalette(
   )
 )
 
-rank_cols <- cup_ramp(5)
+stat_cols <- cup_ramp(4)
+
+names(stat_cols) <- c(
+  "min",
+  "mean",
+  "median",
+  "max"
+)
 
 
 # ===============================================================
@@ -485,7 +560,7 @@ rank_cols <- cup_ramp(5)
 # ===============================================================
 
 world <- ne_countries(
-  scale = "medium",
+  scale = 110L,
   returnclass = "sf"
 )
 
@@ -495,14 +570,12 @@ world$continent_group <- countrycode(
   "continent"
 )
 
-
 world_joined <- world %>%
   left_join(
-    top5_by_continent %>%
-      st_drop_geometry() %>%
+    continent_summary %>%
       select(
         iso3,
-        rank
+        stat
       ),
     by = c(
       "iso_a3" = "iso3"
@@ -525,23 +598,21 @@ make_continent_map <- function(cont) {
     
     geom_sf(
       aes(
-        fill = factor(rank)
+        fill = stat
       ),
       color = map_border,
       linewidth = 0.10
     ) +
     
     scale_fill_manual(
-      values = setNames(
-        rank_cols,
-        as.character(1:5)
-      ),
+      values = stat_cols,
       na.value = map_bg_country,
       guide = "none"
     ) +
     
     coord_sf(
-      expand = TRUE
+      expand = TRUE,
+      datum = NA
     ) +
     
     theme_void() +
@@ -555,7 +626,6 @@ make_continent_map <- function(cont) {
       )
     )
 }
-
 
 continent_maps <- lapply(
   continents,
@@ -659,38 +729,32 @@ draw_bean <- function(
     )
   )
   
-  
   a <- seq(
     0,
     2 * pi,
     length.out = 80
   )
   
-  
   grid.polygon(
     x =
       0.5 +
       0.5 *
       cos(a),
-    
     y =
       0.5 +
       0.5 *
       sin(a),
-    
     gp = gpar(
       fill = color,
       col = NA
     )
   )
   
-  
   t <- seq(
     0,
     1,
     length.out = 40
   )
-  
   
   grid.lines(
     x =
@@ -699,15 +763,12 @@ draw_bean <- function(
       sin(
         t * pi
       ),
-    
     y = t,
-    
     gp = gpar(
       col = bg_color,
       lwd = 2
     )
   )
-  
   
   upViewport()
 }
@@ -728,13 +789,11 @@ abbrev_country <- function(
     return("")
   }
   
-  
   if (
     nchar(name) <= max_chars
   ) {
     return(name)
   }
-  
   
   paste0(
     substr(
@@ -765,13 +824,11 @@ ellipse_xy <- function(
     length.out = n
   )
   
-  
   list(
     x =
       cx +
       rx *
       cos(a),
-    
     y =
       cy +
       ry *
@@ -781,228 +838,353 @@ ellipse_xy <- function(
 
 
 # ===============================================================
-# 23. DRAW CUP
+# 23. DRAW COFFEE CUP
+#
+# IMPORTANT:
+#   The cup is deliberately compact vertically.
+#   Steam is also shortened so that the complete cup remains
+#   inside its continent card.
+# ===============================================================
+
+# ===============================================================
+# WHITE CERAMIC COFFEE CUP
+# ===============================================================
+
+# ===============================================================
+# FLAT INFOGRAPHIC COFFEE CUP
+# Inspired by vintage coffee infographic illustrations
 # ===============================================================
 
 draw_cup <- function(
     cx,
     cy,
     r,
-    rim_col,
-    fill_col,
+    coffee_level = 0.50,
     steam = TRUE
 ) {
   
-  rx <- r
-  ry <- r * 0.78
-  
-  
   # -------------------------------------------------------------
-  # SHADOW
+  # Dimensions
   # -------------------------------------------------------------
   
-  sh <- ellipse_xy(
-    cx + r * 0.06,
-    cy - r * 0.55,
-    rx * 1.05,
-    ry * 0.35
-  )
+  cup_w <- r * 1.05
+  cup_h <- r * 1.05
   
   
-  grid.polygon(
-    sh$x,
-    sh$y,
-    gp = gpar(
-      fill = "#2A1B0E",
-      col = NA,
-      alpha = 0.14
-    )
-  )
-  
-  
-  # -------------------------------------------------------------
+  # =============================================================
   # SAUCER
-  # -------------------------------------------------------------
+  # =============================================================
   
-  sc <- ellipse_xy(
+  saucer <- ellipse_xy(
     cx,
-    cy - r * 0.05,
-    rx * 1.55,
-    ry * 0.95
+    cy - r * 0.82,
+    r * 1.22,
+    r * 0.16
   )
   
-  
   grid.polygon(
-    sc$x,
-    sc$y,
+    saucer$x,
+    saucer$y,
     gp = gpar(
       fill = "#FFFFFF",
-      col = map_border,
-      lwd = 0.5,
-      alpha = 0.55
+      col = "#FFFFFF"
     )
   )
   
   
-  # -------------------------------------------------------------
-  # HANDLE
-  # -------------------------------------------------------------
+  # =============================================================
+  # HANDLE — DRAW FIRST SO BODY SITS OVER IT
+  # =============================================================
   
-  ha <- seq(
-    -pi * 0.55,
-    pi * 0.55,
-    length.out = 30
+  handle_outer <- ellipse_xy(
+    cx + r * 0.86,
+    cy + r * 0.05,
+    r * 0.42,
+    r * 0.48
+  )
+  
+  handle_inner <- ellipse_xy(
+    cx + r * 0.86,
+    cy + r * 0.05,
+    r * 0.24,
+    r * 0.29
+  )
+  
+  grid.polygon(
+    handle_outer$x,
+    handle_outer$y,
+    gp = gpar(
+      fill = "#FFFFFF",
+      col = "#FFFFFF"
+    )
+  )
+  
+  grid.polygon(
+    handle_inner$x,
+    handle_inner$y,
+    gp = gpar(
+      fill = bg_color,
+      col = bg_color
+    )
   )
   
   
-  hx <- cx +
-    rx * 0.92 +
-    rx * 0.34 *
-    cos(ha)
+  # =============================================================
+  # CUP BODY
+  # =============================================================
+  
+  # Slightly tapered body
+  body_x <- c(
+    cx - r * 0.78,
+    cx + r * 0.78,
+    cx + r * 0.66,
+    cx + r * 0.50,
+    cx,
+    cx - r * 0.50,
+    cx - r * 0.66,
+    cx - r * 0.78
+  )
+  
+  body_y <- c(
+    cy + r * 0.43,
+    cy + r * 0.43,
+    cy - r * 0.38,
+    cy - r * 0.70,
+    cy - r * 0.78,
+    cy - r * 0.70,
+    cy - r * 0.38,
+    cy + r * 0.43
+  )
+  
+  grid.polygon(
+    body_x,
+    body_y,
+    gp = gpar(
+      fill = "#FFFFFF",
+      col = "#FFFFFF",
+      lwd = 1
+    )
+  )
   
   
-  hy <- cy +
-    ry * 0.30 *
-    sin(ha)
+  # =============================================================
+  # COFFEE AREA
+  # =============================================================
   
+  # Map coffee_level to vertical position
+  coffee_y <- cy -
+    r * 0.65 +
+    coffee_level * r * 1.05
+  
+  coffee_rx <- r * 0.61
+  coffee_ry <- r * 0.13
+  
+  coffee <- ellipse_xy(
+    cx,
+    coffee_y,
+    coffee_rx,
+    coffee_ry
+  )
+  
+  grid.polygon(
+    coffee$x,
+    coffee$y,
+    gp = gpar(
+      fill = "#4A2E14",
+      col = "#4A2E14"
+    )
+  )
+  
+  
+  # =============================================================
+  # COFFEE BODY / VISIBLE FILL
+  # =============================================================
+  
+  # Coffee fill below surface
+  coffee_body_x <- c(
+    cx - r * 0.61,
+    cx + r * 0.61,
+    cx + r * 0.55,
+    cx + r * 0.43,
+    cx,
+    cx - r * 0.43,
+    cx - r * 0.55,
+    cx - r * 0.61
+  )
+  
+  coffee_body_y <- c(
+    coffee_y,
+    coffee_y,
+    cy - r * 0.48,
+    cy - r * 0.65,
+    cy - r * 0.70,
+    cy - r * 0.65,
+    cy - r * 0.48,
+    coffee_y
+  )
+  
+  # Only draw when coffee is sufficiently high
+  if (coffee_level > 0.05) {
+    
+    grid.polygon(
+      coffee_body_x,
+      coffee_body_y,
+      gp = gpar(
+        fill = "#4A2E14",
+        col = NA
+      )
+    )
+  }
+  
+  
+  # =============================================================
+  # COFFEE SURFACE — LIGHTER TOP
+  # =============================================================
+  
+  coffee_surface <- ellipse_xy(
+    cx,
+    coffee_y,
+    r * 0.59,
+    r * 0.115
+  )
+  
+  grid.polygon(
+    coffee_surface$x,
+    coffee_surface$y,
+    gp = gpar(
+      fill = "#6B4223",
+      col = NA
+    )
+  )
+  
+  
+  # =============================================================
+  # SMALL CREMA HIGHLIGHT
+  # =============================================================
+  
+  crema <- ellipse_xy(
+    cx - r * 0.16,
+    coffee_y + r * 0.025,
+    r * 0.22,
+    r * 0.035
+  )
+  
+  grid.polygon(
+    crema$x,
+    crema$y,
+    gp = gpar(
+      fill = "#A8794B",
+      col = NA,
+      alpha = 0.75
+    )
+  )
+  
+  
+  # =============================================================
+  # CUP RIM
+  # =============================================================
+  
+  rim <- ellipse_xy(
+    cx,
+    cy + r * 0.42,
+    r * 0.79,
+    r * 0.16
+  )
+  
+  grid.polygon(
+    rim$x,
+    rim$y,
+    gp = gpar(
+      fill = "#FFFFFF",
+      col = "#FFFFFF"
+    )
+  )
+  
+  
+  # =============================================================
+  # COFFEE VISIBLE INSIDE RIM
+  # =============================================================
+  
+  rim_coffee <- ellipse_xy(
+    cx,
+    cy + r * 0.42,
+    r * 0.60,
+    r * 0.085
+  )
+  
+  grid.polygon(
+    rim_coffee$x,
+    rim_coffee$y,
+    gp = gpar(
+      fill = "#4A2E14",
+      col = NA
+    )
+  )
+  
+  
+  # =============================================================
+  # WHITE FRONT EDGE
+  # =============================================================
+  
+  front_rim <- ellipse_xy(
+    cx,
+    cy + r * 0.42,
+    r * 0.79,
+    r * 0.16
+  )
   
   grid.lines(
-    hx,
-    hy,
+    front_rim$x,
+    front_rim$y,
     gp = gpar(
-      col = rim_col,
-      lwd = 2.6,
-      lineend = "round"
+      col = "#FFFFFF",
+      lwd = 2
     )
   )
   
   
-  # -------------------------------------------------------------
-  # BODY
-  # -------------------------------------------------------------
-  
-  body <- ellipse_xy(
-    cx,
-    cy,
-    rx,
-    ry
-  )
-  
-  
-  grid.polygon(
-    body$x,
-    body$y,
-    gp = gpar(
-      fill = fill_col,
-      col = rim_col,
-      lwd = 2.2
-    )
-  )
-  
-  
-  # -------------------------------------------------------------
-  # INNER RIM
-  # -------------------------------------------------------------
-  
-  inner <- ellipse_xy(
-    cx,
-    cy,
-    rx * 0.94,
-    ry * 0.94
-  )
-  
-  
-  grid.polygon(
-    inner$x,
-    inner$y,
-    gp = gpar(
-      fill = NA,
-      col = rim_col,
-      lwd = 0.6,
-      alpha = 0.35
-    )
-  )
-  
-  
-  # -------------------------------------------------------------
-  # HIGHLIGHT
-  # -------------------------------------------------------------
-  
-  hl <- ellipse_xy(
-    cx - rx * 0.30,
-    cy + ry * 0.28,
-    rx * 0.30,
-    ry * 0.16
-  )
-  
-  
-  grid.polygon(
-    hl$x,
-    hl$y,
-    gp = gpar(
-      fill = "#FFFFFF",
-      col = NA,
-      alpha = 0.30
-    )
-  )
-  
-  
-  # -------------------------------------------------------------
+  # =============================================================
   # STEAM
-  # -------------------------------------------------------------
+  # =============================================================
   
   if (steam) {
     
-    for (
-      off in c(
-        -0.35,
-        0.35
-      )
-    ) {
+    # Short, chunky steam — closer to infographic style
+    for (off in c(-0.22, 0.22)) {
       
       t <- seq(
         0,
         1,
-        length.out = 30
+        length.out = 25
       )
       
-      
       sx <- cx +
-        rx * off +
-        0.12 *
-        r *
-        sin(
-          t * 3 * pi
-        )
-      
+        r * off +
+        sin(t * pi * 1.5) * r * 0.045
       
       sy <- cy +
-        ry * 0.9 +
-        t *
-        r *
-        1.8
-      
+        r * 0.62 +
+        t * r * 0.35
       
       grid.lines(
         sx,
         sy,
         gp = gpar(
           col = "#FFFFFF",
-          lwd = 1.1,
-          alpha = (1 - t) * 0.5
+          lwd = 1.2,
+          alpha = 0.55,
+          lineend = "round"
         )
       )
     }
   }
 }
 
-
 # ===============================================================
 # 24. START PAGE
 # ===============================================================
 
 grid.newpage()
-
 
 grid.rect(
   gp = gpar(
@@ -1030,23 +1212,15 @@ gp_title <- gpar(
   col = title_color
 )
 
-
 gp_subtitle <- gpar(
   fontsize = 12.5,
   fontfamily = "inter",
   col = subtitle_color
 )
 
-
 title_y <- 0.985
 
-
-# ---------------------------------------------------------------
-# TITLE
-# ---------------------------------------------------------------
-
 title_text <- "COFFEE-COUNTRIES"
-
 
 grid.text(
   title_text,
@@ -1059,16 +1233,10 @@ grid.text(
   gp = gp_title
 )
 
-
-# ---------------------------------------------------------------
-# COFFEE BEAN AFTER TITLE
-# ---------------------------------------------------------------
-
 title_width <- text_w(
   title_text,
   gp_title
 )
-
 
 draw_bean(
   cx =
@@ -1092,14 +1260,12 @@ subtitle_y <-
   title_y -
   0.050
 
-
 draw_line(
   "How much of a barista's working day goes into one small cappuccino?",
   x0,
   subtitle_y,
   gp_subtitle
 )
-
 
 draw_line(
   "And what does the café sample behind the index actually look like?",
@@ -1108,7 +1274,6 @@ draw_line(
     0.022,
   gp_subtitle
 )
-
 
 header_bottom <-
   subtitle_y -
@@ -1133,7 +1298,6 @@ box_height <- 0.115
 box_ymin <-
   box_ymax -
   box_height
-
 
 grid.roundrect(
   x =
@@ -1162,13 +1326,11 @@ grid.roundrect(
   )
 )
 
-
 gp_box <- gpar(
   fontsize = 10.3,
   fontfamily = "inter",
   col = title_color
 )
-
 
 box_lines <- c(
   
@@ -1191,11 +1353,9 @@ box_lines <- c(
   )
 )
 
-
 box_cursor <-
   box_ymax -
   0.018
-
 
 for (
   ln in box_lines
@@ -1225,7 +1385,6 @@ divider_y <-
   ) -
   0.010
 
-
 grid.lines(
   x = c(
     x0,
@@ -1253,61 +1412,52 @@ gp_axis <- gpar(
   col = title_color
 )
 
-
 axis_y <-
   divider_y -
   0.012
 
-
 draw_line(
-  "LIGHTER = CHEAPER",
+  "How much work does a coffee cost across the globe?",
   x0,
   axis_y,
   gp_axis
 )
 
-
-draw_line(
-  "DARKER = PRICIER · WITHIN EACH REGION'S TOP 5",
-  x_max,
-  axis_y,
-  gp_axis,
-  hjust = "right"
-)
+# draw_line(
+#   "COFFEE LEVEL = MIN · MEAN · MEDIAN · MAX",
+#   x_max,
+#   axis_y,
+#   gp_axis,
+#   hjust = "right"
+# )
 
 
 # ===============================================================
 # 30. MAIN CONTENT AREA
 #
-# More vertical space is given to the rows.
-# The café section is pulled upward so there is no large
-# dead area after Oceania.
+# IMPORTANT:
+#   The continent rows now have an explicit gap.
+#
+#   Instead of:
+#
+#     row_h = plot_h / n_continents
+#
+#   we reserve space for gaps first.
 # ===============================================================
 
 content_top <-
   axis_y -
   0.028
 
-
 plot_ymax <-
   content_top
 
-
-# Previously the café section began much lower.
-# Pull it up substantially.
-
 plot_ymin <-
-  0.305
-
+  0.315
 
 plot_h <-
   plot_ymax -
   plot_ymin
-
-
-row_h <-
-  plot_h /
-  n_continents
 
 
 # ===============================================================
@@ -1316,19 +1466,42 @@ row_h <-
 
 label_w <- 0.135
 
-map_w <- 0.250
+map_w <- 0.030
 
 cups_x0 <-
   label_w +
   map_w +
   0.012
 
-
 cups_x1 <- 0.985
 
 
 # ===============================================================
-# 32. MAIN VIEWPORT
+# 32. ROW SPACING
+#
+# This is the key change.
+#
+# continent_gap controls the visible space between Africa,
+# Asia, Europe, etc.
+#
+# The card is intentionally smaller than row_h so the background
+# of the page is visible between cards.
+# ===============================================================
+
+continent_gap <- 0.018
+
+rows_height <-
+  plot_h -
+  continent_gap *
+  (n_continents - 1)
+
+row_h <-
+  rows_height /
+  n_continents
+
+
+# ===============================================================
+# 33. MAIN VIEWPORT
 # ===============================================================
 
 pushViewport(
@@ -1349,9 +1522,40 @@ pushViewport(
   )
 )
 
+# ===============================================================
+# STATISTIC COLUMN HEADERS
+# ===============================================================
+
+stat_headers <- c(
+  "MIN",
+  "MEAN",
+  "MEDIAN",
+  "MAX"
+)
+
+# Centre of each of the four card columns
+header_x <- cups_x0 +
+  (seq_along(stat_headers) - 0.5) *
+  ((cups_x1 - cups_x0) / 4)
+
+# Header position
+header_y <- plot_ymax + 0.212
+
+grid.text(
+  stat_headers,
+  x = header_x,
+  y = header_y,
+  gp = gpar(
+    fontfamily = "bebas",
+    fontsize = 12,
+    fontface = "bold",
+    col = title_color
+  )
+)
+
 
 # ===============================================================
-# 33. CONTINENT ROWS
+# 34. CONTINENT ROWS
 # ===============================================================
 
 for (
@@ -1361,30 +1565,32 @@ for (
   cont <-
     continents[i]
   
-  
-  rows <- top5_by_continent %>%
+  rows <- continent_summary %>%
     filter(
       continent == cont
     ) %>%
     arrange(
-      index
+      stat
     )
   
   
   # -------------------------------------------------------------
   # ROW POSITION
+  #
+  # The gap is added between rows.
   # -------------------------------------------------------------
   
   row_top <-
     1 -
     (i - 1) *
-    row_h
-  
+    (
+      row_h +
+        continent_gap
+    )
   
   row_bot <-
     row_top -
     row_h
-  
   
   cy <-
     row_top -
@@ -1417,20 +1623,25 @@ for (
   
   map_center_x <-
     label_w +
-    map_w / 2
+    map_w / 3
   
-  
+  if (cont == "Oceania") {
+    map_x <- map_center_x - 0.13
+    map_width <- map_w * 0.90
+  }
+  else{
+    map_x<-map_center_x-0.07
+  }
   pushViewport(
     viewport(
-      x = map_center_x,
+      x = map_x,
       y = cy,
-      width = map_w,
+      width = 2.37,
+      jus="center",
       height =
-        row_h *
-        0.95
+        row_h
     )
   )
-  
   
   grid.draw(
     ggplotGrob(
@@ -1438,28 +1649,30 @@ for (
     )
   )
   
-  
   upViewport()
   
   
   # =============================================================
-  # COFFEE TRAY
+  # COFFEE CARD AREA
   #
-  # Taller tray = larger cups.
+  # The card is deliberately smaller than row_h.
+  # This creates visible space between continent cards.
   # =============================================================
   
   tray_x0 <-
     cups_x0
   
-  
   tray_x1 <-
     cups_x1
   
-  
   tray_h <-
     row_h *
-    0.88
+    1.22
   
+  
+  # -------------------------------------------------------------
+  # CARD
+  # -------------------------------------------------------------
   
   grid.roundrect(
     x =
@@ -1489,15 +1702,11 @@ for (
   
   
   # =============================================================
-  # CUPS
+  # FOUR CUP CELLS
   # =============================================================
   
   n_cups <-
-    min(
-      nrow(rows),
-      5
-    )
-  
+    nrow(rows)
   
   cell_w <-
     (
@@ -1507,69 +1716,130 @@ for (
     n_cups
   
   
-  # Increased from the previous 0.030
-  cup_r <-
+  # -------------------------------------------------------------
+  # CUP SIZE
+  #
+  # Same physical cup size for every statistic.
+  #
+  # The coffee level — not the cup size — carries the
+  # MIN / MEAN / MEDIAN / MAX meaning.
+  # -------------------------------------------------------------
+  
+  base_r <-
     min(
-      0.036,
-      row_h * 0.29
+      0.030,
+      row_h * 0.27,
+      cell_w * 0.22
     )
   
+  
+  # Same cup size
+  size_mult <- c(
+    small  = 1,
+    medium = 1,
+    large  = 1
+  )
+  
+  
+  # =============================================================
+  # CUP LOOP
+  # =============================================================
   
   for (
     j in seq_len(n_cups)
   ) {
+    # -----------------------------------------------------------
+    # CENTER OF CARD CELL
+    # -----------------------------------------------------------
+    
     
     cx <-
       tray_x0 +
-      (j - 0.5) *
+      (
+        j - 0.5
+      ) *
       cell_w
+    minutes_value <- rows$value[j]
+
+    grid.text(
+      paste0(round(minutes_value, 0), " min"),
+      x = cx,
+      y = cup_y + cup_r * 1.25,
+      just = "centre",
+      gp = gpar(
+        fontfamily = "inter",
+        fontsize = 7,
+        fontface = "bold",
+        col = coffee_dark
+      )
+    )
     
+    # -----------------------------------------------------------
+    # COFFEE LEVEL
+    #
+    # MIN    = low
+    # MEAN   = medium
+    # MEDIAN = medium
+    # MAX    = high
+    # -----------------------------------------------------------
+    
+    coffee_level <- dplyr::case_when(
+      
+      rows$stat[j] == "min" ~
+        0.28,
+      
+      rows$stat[j] == "mean" ~
+        0.52,
+      
+      rows$stat[j] == "median" ~
+        0.52,
+      
+      rows$stat[j] == "max" ~
+        0.90,
+      
+      TRUE ~
+        0.50
+    )
+    
+    
+    # -----------------------------------------------------------
+    # CUP RADIUS
+    # -----------------------------------------------------------
+    
+    cup_r <- base_r 
+    
+    
+    # -----------------------------------------------------------
+    # CUP POSITION
+    #
+    # Slightly above card center.
+    #
+    # The cup is kept away from the top and bottom boundaries
+    # so steam and country labels remain inside the card.
+    # -----------------------------------------------------------
     
     cup_y <-
       cy +
       tray_h *
-      0.075
+      0.055
     
     
-    # -----------------------------------------------------------
+    # ===========================================================
     # CUP
-    # -----------------------------------------------------------
+    # ===========================================================
     
     draw_cup(
-      cx,
-      cup_y,
+      cx = cx,
+      cy = cup_y,
       r = cup_r,
-      rim_col = coffee_dark,
-      fill_col = rank_cols[j],
+      coffee_level = coffee_level,
       steam = TRUE
     )
     
     
-    # -----------------------------------------------------------
-    # VALUE
-    # -----------------------------------------------------------
-    
-    grid.text(
-      paste0(
-        round(
-          rows$index[j]
-        ),
-        "m"
-      ),
-      x = cx,
-      y = cup_y,
-      gp = gpar(
-        fontsize = 8.5,
-        fontfamily = "inter",
-        fontface = "bold",
-        col = "#FFFFFF"
-      )
-    )
-    
-    
-    # -----------------------------------------------------------
+    # ===========================================================
     # COUNTRY
-    # -----------------------------------------------------------
+    # ===========================================================
     
     grid.text(
       abbrev_country(
@@ -1580,19 +1850,23 @@ for (
       y =
         cy -
         tray_h *
-        0.39,
+        0.34,
+      just = "center",
       gp = gpar(
-        fontsize = 8.0,
+        fontsize = 7.4,
         fontfamily = "inter",
+        fontface = "bold",
         col = title_color
-      ),
-      just = "center"
+      )
     )
   }
   
   
   # =============================================================
   # ROW DIVIDER
+  #
+  # This is intentionally very subtle.
+  # The actual separation is created by the card gap.
   # =============================================================
   
   if (
@@ -1605,13 +1879,16 @@ for (
         1
       ),
       y = c(
-        row_bot,
-        row_bot
+        row_bot -
+          continent_gap / 2,
+        row_bot -
+          continent_gap / 2
       ),
       gp = gpar(
         col = line_color,
-        lwd = 0.4,
-        lty = "dotted"
+        lwd = 0.35,
+        lty = "dotted",
+        alpha = 0.65
       )
     )
   }
@@ -1619,20 +1896,19 @@ for (
 
 
 # ===============================================================
-# CLOSE MAIN VIEWPORT
+# 35. CLOSE MAIN VIEWPORT
 # ===============================================================
 
 upViewport()
 
 
 # ===============================================================
-# 34. CAFÉS IN NUMBERS
+# 36. CAFÉS IN NUMBERS
 # ===============================================================
 
 cafe_top <-
   plot_ymin -
   0.012
-
 
 cafe_bottom <-
   0.075
@@ -1647,7 +1923,6 @@ gp_cafe_title <- gpar(
   fontfamily = "bebas",
   col = coffee_dark
 )
-
 
 draw_line(
   "CAFÉS IN NUMBERS",
@@ -1667,7 +1942,6 @@ gp_cafe_sub <- gpar(
   col = subtitle_color
 )
 
-
 draw_line(
   "The country index is only part of the story. Café-level observations reveal how much prices can vary.",
   x0,
@@ -1678,20 +1952,17 @@ draw_line(
 
 
 # ===============================================================
-# 35. INSIGHT CARDS
+# 37. INSIGHT CARDS
 # ===============================================================
 
 card_top <-
   cafe_top -
   0.048
 
-
 card_bottom <-
   cafe_bottom
 
-
 card_gap <- 0.009
-
 
 card_w <-
   (
@@ -1701,14 +1972,24 @@ card_w <-
   ) /
   4
 
-
 card_x <- c(
   x0,
-  x0 + card_w + card_gap,
-  x0 + 2 * (card_w + card_gap),
-  x0 + 3 * (card_w + card_gap)
+  x0 +
+    card_w +
+    card_gap,
+  x0 +
+    2 *
+    (
+      card_w +
+        card_gap
+    ),
+  x0 +
+    3 *
+    (
+      card_w +
+        card_gap
+    )
 )
-
 
 card_h <-
   card_top -
@@ -1716,7 +1997,7 @@ card_h <-
 
 
 # ===============================================================
-# 36. CARD FUNCTION
+# 38. CARD FUNCTION
 # ===============================================================
 
 draw_card <- function(
@@ -1751,7 +2032,9 @@ draw_card <- function(
   )
   
   
-  # accent strip
+  # -------------------------------------------------------------
+  # ACCENT STRIP
+  # -------------------------------------------------------------
   
   grid.rect(
     x =
@@ -1772,7 +2055,9 @@ draw_card <- function(
   )
   
   
-  # title
+  # -------------------------------------------------------------
+  # TITLE
+  # -------------------------------------------------------------
   
   grid.text(
     title,
@@ -1795,7 +2080,9 @@ draw_card <- function(
   )
   
   
-  # value
+  # -------------------------------------------------------------
+  # VALUE
+  # -------------------------------------------------------------
   
   grid.text(
     value,
@@ -1818,7 +2105,9 @@ draw_card <- function(
   )
   
   
-  # detail
+  # -------------------------------------------------------------
+  # DETAIL
+  # -------------------------------------------------------------
   
   grid.text(
     detail,
@@ -1842,7 +2131,7 @@ draw_card <- function(
 
 
 # ===============================================================
-# 37. CARD 1 — SAMPLE
+# 39. CARD 1 — SAMPLE
 # ===============================================================
 
 draw_card(
@@ -1861,7 +2150,7 @@ draw_card(
 
 
 # ===============================================================
-# 38. CARD 2 — URBANITY
+# 40. CARD 2 — URBANITY
 # ===============================================================
 
 draw_card(
@@ -1880,7 +2169,7 @@ draw_card(
 
 
 # ===============================================================
-# 39. CARD 3 — PRICE VARIATION
+# 41. CARD 3 — PRICE VARIATION
 # ===============================================================
 
 draw_card(
@@ -1897,7 +2186,7 @@ draw_card(
 
 
 # ===============================================================
-# 40. CARD 4 — AFFORDABILITY OUTLIER
+# 42. CARD 4 — AFFORDABILITY OUTLIER
 # ===============================================================
 
 draw_card(
@@ -1919,13 +2208,12 @@ draw_card(
 
 
 # ===============================================================
-# 41. EDITORIAL TAKEAWAY
+# 43. EDITORIAL TAKEAWAY
 # ===============================================================
 
 takeaway_y <-
   cafe_bottom -
   0.018
-
 
 gp_takeaway <- gpar(
   fontsize = 8.8,
@@ -1933,14 +2221,12 @@ gp_takeaway <- gpar(
   col = subtitle_color
 )
 
-
 takeaway_text <- paste0(
   "WHY IT MATTERS  ·  ",
   "A cappuccino's price is only half the story. ",
   "The same drink can demand very different amounts of work depending on local wages — ",
   "and the café sample itself is uneven across countries."
 )
-
 
 grid.text(
   takeaway_text,
@@ -1955,7 +2241,7 @@ grid.text(
 
 
 # ===============================================================
-# 42. FOOTER
+# 44. FOOTER
 # ===============================================================
 
 gp_footer <- gpar(
@@ -1964,19 +2250,15 @@ gp_footer <- gpar(
   col = footer_color
 )
 
-
 footer_bottom <- 0.012
-
 
 footer_text_y <-
   footer_bottom +
   0.004
 
-
 footer_divider_y <-
   footer_text_y +
   0.020
-
 
 grid.lines(
   x = c(
@@ -1993,23 +2275,11 @@ grid.lines(
   )
 )
 
-
-# draw_line(
-#   "made with R",
-#   x0,
-#   footer_text_y +
-#     0.012,
-#   gp_footer
-# )
-
-
 draw_line(
-  "Source: TidyTuesday 2026-09-08 ·Hari Krishna·",
+  "Source: TidyTuesday 2026-09-08 · Hari Krishna",
   x_max,
   footer_text_y +
     0.012,
   gp_footer,
   hjust = "right"
 )
-
-
