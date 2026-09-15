@@ -1565,6 +1565,7 @@ for (
   
   cont <-
     continents[i]
+  print(cont)
   
   rows <- continent_summary %>%
     filter(
@@ -1753,7 +1754,6 @@ for (
     # CENTER OF CARD CELL
     # -----------------------------------------------------------
     
-    
     cx <-
       tray_x0 +
       (
@@ -1761,7 +1761,6 @@ for (
       ) *
       cell_w
     minutes_value <- rows$value[j]
-
     grid.text(
       paste0(round(minutes_value, 0), " min"),
       x = cx,
@@ -1926,7 +1925,7 @@ grid.text(
     "top"
   ),
   gp = gpar(
-    fontsize = 17,
+    fontsize = 20,
     fontfamily = "oswald",
     fontface = "bold",
     col = coffee_dark
@@ -1947,7 +1946,7 @@ grid.text(
     "top"
   ),
   gp = gpar(
-    fontsize = 8.8,
+    fontsize = 9.8,
     fontfamily = "inter",
     col = subtitle_color
   )
@@ -2063,7 +2062,7 @@ draw_cafe_card <- function(
       "top"
     ),
     gp = gpar(
-      fontsize = 15.4,
+      fontsize = 20.4,
       fontfamily = "bebas",
       fontface = "bold",
       col = footer_color
@@ -2088,7 +2087,7 @@ draw_cafe_card <- function(
       "top"
     ),
     gp = gpar(
-      fontsize = 22,
+      fontsize = 25,
       fontfamily = "bebas",
       fontface = "bold",
       col = title_color
@@ -2113,7 +2112,7 @@ draw_cafe_card <- function(
       "bottom"
     ),
     gp = gpar(
-      fontsize = 5.0,
+      fontsize = 7.0,
       fontfamily = "bebas",
       col = subtitle_color
     )
@@ -2189,7 +2188,7 @@ draw_cafe_card(
   card_x[4],
   "AVERAGE CAFÉ PRICE",
   sprintf(
-    "£%.2f\n£%.2f → £%.2f",
+    "£%.2f\nMIN £%.2f  --  MAX £%.2f",
     mean_cafe_price,
     min(cafe$price_gbp, na.rm = TRUE),
     max(cafe$price_gbp, na.rm = TRUE)
@@ -2296,7 +2295,7 @@ footer_divider_y <-
 grid.text(
   "Data: TidyTuesday · Design: Hari Krishna",
   x = x_max,
-  y = footer_bottom + 0.315,
+  y = footer_bottom + 0.265,
   just = c(
     "right",
     "center"
