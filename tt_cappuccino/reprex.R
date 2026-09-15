@@ -1770,16 +1770,16 @@ grid.text(
         coffee_level <- dplyr::case_when(
           
           rows$stat[j] == "min" ~
-            0.28,
+            0.18,
           
           rows$stat[j] == "mean" ~
-            0.52,
+            0.50,
           
           rows$stat[j] == "median" ~
-            0.52,
+            0.50,
           
           rows$stat[j] == "max" ~
-            0.90,
+            0.95,
           
           TRUE ~
             0.50
@@ -1815,7 +1815,7 @@ grid.text(
           just = "centre",
           gp = gpar(
             fontfamily = "inter",
-            fontsize = 9,
+            fontsize = 15,
             fontface = "bold",
             col = coffee_dark
           )
@@ -1847,10 +1847,10 @@ grid.text(
           y =
             cy -
             tray_h *
-            0.34,
+            0.24,
           just = "center",
           gp = gpar(
-            fontsize = 7.4,
+            fontsize = 10.4,
             fontfamily = "inter",
             fontface = "bold",
             col = title_color
@@ -2300,7 +2300,7 @@ footer_divider_y <-
 grid.text(
   "Data: TidyTuesday · Design: Hari Krishna",
   x = x_max,
-  y = footer_bottom + 0.265,
+  y = footer_bottom + 0.065,
   just = c(
     "right",
     "center"
