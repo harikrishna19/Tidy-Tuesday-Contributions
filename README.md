@@ -15,3 +15,7 @@ Plot displays the medals won by a particular country,sport and year. Medal count
 2.  World Castles Viz: TidyTuesday 2026:September
 
 ![](images/final_tt.png)
+
+3.  Coffee Viz
+
+![](images/coffee_viz.png)
