@@ -1407,7 +1407,7 @@ grid.lines(
 # ===============================================================
 
 gp_axis <- gpar(
-  fontsize = 10.5,
+  fontsize = 9.5,
   fontfamily = "inter",
   fontface = "bold",
   col = title_color
@@ -1417,12 +1417,12 @@ axis_y <-
   divider_y -
   0.012
 
-# draw_line(
-#   "How much work does a coffee cost across the globe?",
-#   x0,
-#   axis_y,
-#   gp_axis
-# )
+draw_line(
+"For mean and median values, the country closest is selected.",
+  x0,
+  axis_y,
+  gp_axis
+)
 
 # draw_line(
 #   "COFFEE LEVEL = MIN · MEAN · MEDIAN · MAX",
@@ -1545,8 +1545,8 @@ grid.text(
   y = header_y,
   gp = gpar(
     fontfamily = "oswald",
-    fontsize = 12,
-    fontface = "bold",
+    fontsize = 15,
+    # fontface = "bold",
     col = title_color
   )
 )
@@ -1623,7 +1623,7 @@ grid.text(
         map_w / 3
       
       if (cont == "Oceania") {
-        map_x <- map_center_x - 0.13
+        map_x <- map_center_x - 0.19
         map_width <- map_w * 0.90
       }
       else{
@@ -1811,12 +1811,12 @@ grid.text(
         grid.text(
           paste0(round(minutes_value, 0), " min"),
           x = cx,
-          y = cup_y + cup_r * 1.25,
+          y = cup_y + cup_r * 1.55,
           just = "centre",
           gp = gpar(
             fontfamily = "inter",
-            fontsize = 15,
-            fontface = "bold",
+            fontsize = 18,
+            # fontface = "bold",
             col = coffee_dark
           )
         )
@@ -1850,7 +1850,7 @@ grid.text(
             0.24,
           just = "center",
           gp = gpar(
-            fontsize = 10.4,
+            fontsize = 14,
             fontfamily = "inter",
             fontface = "bold",
             col = title_color
@@ -1946,9 +1946,9 @@ grid.text(
     "top"
   ),
   gp = gpar(
-    fontsize = 9.8,
+    fontsize = 11.8,
     fontfamily = "inter",
-    col = subtitle_color
+    col = "black"
   )
 )
 
@@ -2298,7 +2298,7 @@ footer_divider_y <-
 # )
 
 grid.text(
-  "Data: TidyTuesday · Design: Hari Krishna",
+  "Data: TidyTuesday- Hari Krishna",
   x = x_max,
   y = footer_bottom + 0.065,
   just = c(
@@ -2306,7 +2306,7 @@ grid.text(
     "center"
   ),
   gp = gpar(
-    fontsize = 15.5,
+    fontsize = 17.5,
     fontfamily = "oswald",
     col = "black"
   )
